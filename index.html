@@ -1,10 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<title>SocketIO Playground</title>
+  <meta charset="UTF-8">
+  <title>SocketIO Playground</title>
 </head>
+
+<style>
+  .message-box {
+    display: flex;
+
+  }
+  .message-box__box {
+    flex-grow: 1;
+    resize: none;
+  }
+  .message-box__btn {
+    width: 80px;
+    text-align: center;
+  }
+</style>
+
+
 <body>
-	Hello!
+  <p>
+    Mini-chat
+  </p>
+  <form class="message-form">
+    <div class="message-box">
+      <textarea
+        class="message-box__box"
+        placeholder="Write your message here..."
+      ></textarea>
+      <button
+        class="message-box__btn"
+        type="submit"
+      >
+        Send
+      </button>
+    </div>
+  </form>
 </body>
+
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+
+  const form = document.querySelector('.message-form');
+  const msgBox = document.querySelector('.message-box__box');
+  const msgBtn = document.querySelector('.message-box__btn');
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    console.log(`Message sent: ${msgBox.value}`);
+    socket.emit('messagesent', msgBox.value);
+  });
+
+  msgBox.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.key === 'Enter' ) {
+      msgBtn.click();
+    }
+  });
+</script>
+
 </html>
