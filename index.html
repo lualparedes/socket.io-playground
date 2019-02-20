@@ -6,30 +6,65 @@
 </head>
 
 <style>
+  @import url('https://fonts.googleapis.com/css?family=Assistant:400,800');
+
+  :root {
+    --c-bg: #efefef;
+    --c-text: #555;
+    font-size: 18px;
+  }
+
+  * {
+    font-family: 'Assistant', sans-serif;
+    font-size: inherit;
+    color: var(--c-text);
+  }
+
+  .chat-title {
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .4em;
+    text-align: center;
+  }
+
+  .chat-box {
+
+  }
+  .chat-message {
+    background: var(--c-bg);
+    padding: 4px;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+  }
+
   .message-box {
     display: flex;
-
   }
   .message-box__box {
     flex-grow: 1;
     resize: none;
+    padding: 8px;
   }
   .message-box__btn {
     width: 80px;
+    text-transform: uppercase;
     text-align: center;
+    padding: 4px;
+    height: 40px;
+    font-weight: 800;
   }
 </style>
 
 
 <body>
-  <p>
-    Mini-chat
-  </p>
+  <h1 class="chat-title">Mini-chat</h1>
+  <main class="chat-box"></main>
   <form class="message-form">
     <div class="message-box">
       <textarea
         class="message-box__box"
         placeholder="Write your message here..."
+        rows="1"
       ></textarea>
       <button
         class="message-box__btn"
@@ -45,15 +80,43 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
   const socket = io();
+  let room;
 
+  const chatBox = document.querySelector('.chat-box');
   const form = document.querySelector('.message-form');
   const msgBox = document.querySelector('.message-box__box');
   const msgBtn = document.querySelector('.message-box__btn');
 
+
+  socket.on('accept', () => {
+    console.log('You got into my-awesome-default-room');
+    room = 'my-awesome-default-room';
+  });
+
+  socket.on('reject', () => {
+    console.log('You couldn\'t get into my-awesome-default-room');
+    room = 'rejection-room';
+    chatBox.innerHTML = 'Room is full, try again later';
+    msgBox.style.display = 'none';
+    msgBtn.style.display = 'none';
+  });
+
+  socket.on('newmessage', (data) => {
+    const msg = document.createElement('div');
+    msg.classList.add('chat-message');
+    msg.innerHTML = data;
+    chatBox.append(msg);
+  });
+
+
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     console.log(`Message sent: ${msgBox.value}`);
-    socket.emit('messagesent', msgBox.value);
+    socket.emit('messagesent', {
+      message: msgBox.value,
+      room
+    });
+    msgBox.value = '';
   });
 
   msgBox.addEventListener('keydown', (e) => {
